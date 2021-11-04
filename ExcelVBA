@@ -1,1 +1,718 @@
+Function GetIDs()
 
+    Dim LinkTextDataV_ID As String
+    Dim LinkTextDataV_ID_Start As Double
+    Dim LinkTextDataV_ID_End As Double
+    
+    LinkTextDataV_ID_Start = InStr(HTML, "<span class=" & Chr(34) & "link-text" & Chr(34) & " data-v-") + Len("<span class=" & Chr(34) & "link-text" & Chr(34) & " data-v-")
+    LinkTextDataV_ID_End = InStr(LinkTextDataV_ID_Start, HTML, ">")
+    LinkTextDataV_ID = Mid(HTML, LinkTextDataV_ID_Start, LinkTextDataV_ID_End - LinkTextDataV_ID_Start)
+    Debug.Print LinkTextDataV_ID
+    
+    
+    Dim RemDataV_ID As String
+    Dim RemDataV_ID_Start As Double
+    Dim RemDataV_ID_End As Double
+    
+    RemDataV_ID_Start = InStr(LinkTextDataV_ID_Start, HTML, "ff:secondary fs:24-rem fw:bold mb:24-rem" & Chr(34) & " data-v-") + Len("ff:secondary fs:24-rem fw:bold mb:24-rem" & Chr(34) & " data-v-")
+    RemDataV_ID_End = InStr(RemDataV_ID_Start, HTML, ">")
+    RemDataV_ID = Mid(HTML, RemDataV_ID_Start, RemDataV_ID_End - RemDataV_ID_Start)
+    Debug.Print RemDataV_ID
+    
+End Function
+
+Function GetHTML(url As String) As String
+
+    Dim HTML As String
+    With CreateObject("MSXML2.XMLHTTP")
+        .Open "GET", url, False
+        .Send
+        GetHTML = .ResponseText
+    End With
+
+End Function
+
+Function Clipboard(Optional StoreText As String) As String
+
+Dim x As Variant
+  x = StoreText
+  With CreateObject("htmlfile")
+    With .parentWindow.clipboardData
+      Select Case True
+        Case Len(StoreText)
+            .setData "text", x
+        Case Else
+            Clipboard = .GetData("text")
+      End Select
+    End With
+  End With
+
+End Function
+
+Private Sub GetCities()
+
+    HTML = GetHTML("https://kasa.com/locations")
+    SheetName = "Cities"
+    Dim iRow As Integer
+    iRow = 2
+    
+    Dim PositionStart As Double
+    Dim PositionEnd As Double
+    PositionStart = 1
+    PositionEnd = 1
+    
+    Dim CityTextStart  As String
+    Dim CityTextEnd  As String
+    Dim CityText  As String
+    Dim CityFullText  As String
+    Dim StateText  As String
+    Dim NextCityTextStart  As String
+    
+    Dim LinkTextDataV_ID As String
+    Dim LinkTextDataV_ID_Start As Double
+    Dim LinkTextDataV_ID_End As Double
+    
+    LinkTextDataV_ID_Start = InStr(HTML, "<span class=" & Chr(34) & "link-text" & Chr(34) & " data-v-") + Len("<span class=" & Chr(34) & "link-text" & Chr(34) & " data-v-")
+    LinkTextDataV_ID_End = InStr(LinkTextDataV_ID_Start, HTML, ">")
+    LinkTextDataV_ID = Mid(HTML, LinkTextDataV_ID_Start, LinkTextDataV_ID_End - LinkTextDataV_ID_Start)
+    Debug.Print LinkTextDataV_ID
+    
+    Dim RemDataV_ID As String
+    Dim RemDataV_ID_Start As Double
+    Dim RemDataV_ID_End As Double
+    
+    RemDataV_ID_Start = InStr(LinkTextDataV_ID_Start, HTML, "ff:secondary fs:24-rem fw:bold mb:24-rem" & Chr(34) & " data-v-") + Len("ff:secondary fs:24-rem fw:bold mb:24-rem" & Chr(34) & " data-v-")
+    RemDataV_ID_End = InStr(RemDataV_ID_Start, HTML, ">")
+    RemDataV_ID = Mid(HTML, RemDataV_ID_Start, RemDataV_ID_End - RemDataV_ID_Start)
+    Debug.Print RemDataV_ID
+    
+    CityTextStart = "<span class=" & Chr(34) & "link-text" & Chr(34) & " data-v-" & LinkTextDataV_ID & "><h2 class=" & Chr(34) & "ff:secondary fs:24-rem fw:bold mb:24-rem" & Chr(34) & " data-v-1067a3ea> "
+    CityTextEnd = " </h2></span></a><ul class=" & Chr(34) & "list-reset" & Chr(34) & " data-v-" & RemDataV_ID & ">"
+
+    Sheets(SheetName).Rows(iRow & ":" & Rows.Count).ClearContents
+    
+    Do While InStr(PositionEnd, HTML, CityTextStart) > 0
+    
+        PositionStart = InStr(PositionEnd, HTML, CityTextStart) + Len(CityTextStart)
+        PositionEnd = InStr(PositionStart, HTML, CityTextEnd)
+        
+        CityFullText = Mid(HTML, PositionStart, PositionEnd - PositionStart)
+        StateText = Trim(Right(CityFullText, Len(CityFullText) - InStr(CityFullText, ",")))
+        CityText = Trim(Left(CityFullText, InStr(CityFullText, ",") - 1))
+        
+        NextCityStart = InStr(PositionEnd, HTML, CityTextStart) + Len(CityTextStart)
+        Sheets(SheetName).Cells(iRow, 1).Value = StateText & ", " & CityText
+        Sheets(SheetName).Cells(iRow, 2).Value = StateText
+        Sheets(SheetName).Cells(iRow, 3).Value = CityText
+            
+        iRow = iRow + 1
+    Loop
+    MsgBox "Done."
+
+End Sub
+
+Private Sub GetProperties()
+    HTML = GetHTML("https://www.kasa.com/locations")
+    SheetName = "RAW_Properties"
+    Dim iRow As Integer
+    iRow = 2
+    
+    Dim PositionStart As Double
+    Dim PositionEnd As Double
+    PositionStart = 1
+    PositionEnd = 1
+    
+    Dim LinkTextDataV_ID As String
+    Dim LinkTextDataV_ID_Start As Double
+    Dim LinkTextDataV_ID_End As Double
+    
+    LinkTextDataV_ID_Start = InStr(HTML, "<span class=" & Chr(34) & "link-text" & Chr(34) & " data-v-") + Len("<span class=" & Chr(34) & "link-text" & Chr(34) & " data-v-")
+    LinkTextDataV_ID_End = InStr(LinkTextDataV_ID_Start, HTML, ">")
+    LinkTextDataV_ID = Mid(HTML, LinkTextDataV_ID_Start, LinkTextDataV_ID_End - LinkTextDataV_ID_Start)
+    Debug.Print LinkTextDataV_ID
+    
+    Dim RemDataV_ID As String
+    Dim RemDataV_ID_Start As Double
+    Dim RemDataV_ID_End As Double
+    
+    RemDataV_ID_Start = InStr(LinkTextDataV_ID_Start, HTML, "ff:secondary fs:24-rem fw:bold mb:24-rem" & Chr(34) & " data-v-") + Len("ff:secondary fs:24-rem fw:bold mb:24-rem" & Chr(34) & " data-v-")
+    RemDataV_ID_End = InStr(RemDataV_ID_Start, HTML, ">")
+    RemDataV_ID = Mid(HTML, RemDataV_ID_Start, RemDataV_ID_End - RemDataV_ID_Start)
+    Debug.Print RemDataV_ID
+    
+    Dim CityTextStart  As String
+    Dim CityTextEnd  As String
+    Dim CityText  As String
+    Dim CityFullText  As String
+    Dim StateText  As String
+    Dim NextCityTextStart  As String
+    
+    CityTextStart = "<span class=" & Chr(34) & "link-text" & Chr(34) & " data-v-" & LinkTextDataV_ID & "><h2 class=" & Chr(34) & "ff:secondary fs:24-rem fw:bold mb:24-rem" & Chr(34) & " data-v-" & RemDataV_ID & "> "    
+    CityTextEnd = " </h2></span></a><ul class=" & Chr(34) & "list-reset" & Chr(34) & " data-v-" & RemDataV_ID & ">"
+    
+    Dim PropertyTextStart  As String
+    Dim PropertyTextEnd  As String
+    Dim PropertyText  As String
+    Dim PropertyLinkStart  As String
+    Dim PropertyLinkEnd  As String
+    Dim PropertyLinkText  As String
+    
+    PropertyTextStart = "<span class=" & Chr(34) & "link-text" & Chr(34) & " data-v-" & LinkTextDataV_ID & "> "
+    PropertyTextEndSingle = " </span></a></li></ul></li><li class=" & Chr(34) & "location-group" & Chr(34) & " data-v-" & RemDataV_ID & ">"
+    PropertyTextEndMultiple = " </span></a></li><li class=" & Chr(34) & "property-container" & Chr(34) & " data-v-" & RemDataV_ID & ">"
+
+    PropertyLinkStart = "<!----></div></a><a href=" & Chr(34) & "/properties/"
+    PropertyLinkEnd = Chr(34) & " class=" & Chr(34) & "ff:secondary property-link fw:bold link link-reset"
+    
+    Sheets(SheetName).Rows(iRow & ":" & Rows.Count).ClearContents
+    
+    Do While InStr(PositionEnd, HTML, CityTextStart) > 0
+        PositionStart = InStr(PositionEnd, HTML, CityTextStart) + Len(CityTextStart)
+        PositionEnd = InStr(PositionStart, HTML, CityTextEnd)
+        
+        CityFullText = Mid(HTML, PositionStart, PositionEnd - PositionStart)
+        StateText = Trim(Right(CityFullText, Len(CityFullText) - InStr(CityFullText, ",")))
+        CityText = Trim(Left(CityFullText, InStr(CityFullText, ",") - 1))
+        
+        NextCityStart = InStr(PositionEnd, HTML, CityTextStart) + Len(CityTextStart)
+            
+        Do While InStr(PositionEnd, HTML, PropertyLinkStart) < NextCityStart
+            Sheets(SheetName).Cells(iRow, 1).Value = Trim(StateText & ", " & CityText)
+            Sheets(SheetName).Cells(iRow, 2).Value = Trim(StateText)
+            Sheets(SheetName).Cells(iRow, 3).Value = Trim(CityText)
+            
+            PositionStart = InStr(PositionEnd, HTML, PropertyLinkStart) + Len(PropertyLinkStart)
+            PositionEnd = InStr(PositionStart, HTML, PropertyLinkEnd)
+            
+            PropertyLinkText = Mid(HTML, PositionStart, PositionEnd - PositionStart)
+            Sheets(SheetName).Cells(iRow, 5).Value = Trim(PropertyLinkText)
+            
+            PositionStart = InStr(PositionEnd, HTML, PropertyTextStart) + Len(PropertyTextStart)
+            PositionEnd = WorksheetFunction.Min(InStr(PositionStart, HTML, PropertyTextEndSingle), IIf(InStr(PositionStart, HTML, PropertyTextEndMultiple) = 0, 9999999, InStr(PositionStart, HTML, PropertyTextEndMultiple)))
+            
+            PropertyText = Mid(HTML, PositionStart, PositionEnd - PositionStart)
+            Sheets(SheetName).Cells(iRow, 4).Value = Trim(PropertyText)
+
+            iRow = iRow + 1
+        Loop
+    Loop
+    
+	Sheets(SheetName).Cells(iRow, 1).Value = Trim(StateText & ", " & CityText)
+	Sheets(SheetName).Cells(iRow, 2).Value = Trim(StateText)
+	Sheets(SheetName).Cells(iRow, 3).Value = Trim(CityText)
+	
+	PositionStart = InStr(PositionEnd, HTML, PropertyLinkStart) + Len(PropertyLinkStart)
+	PositionEnd = InStr(PositionStart, HTML, PropertyLinkEnd)
+	
+	PropertyLinkText = Mid(HTML, PositionStart, PositionEnd - PositionStart)
+	Sheets(SheetName).Cells(iRow, 5).Value = Trim(PropertyLinkText)
+	
+	PositionStart = InStr(PositionEnd, HTML, PropertyTextStart) + Len(PropertyTextStart)
+	PositionEnd = InStr(PositionStart, HTML, "  </span></a></li></ul></li></ul></main>")
+	
+	PropertyText = Mid(HTML, PositionStart, PositionEnd - PositionStart)
+	Sheets(SheetName).Cells(iRow, 4).Value = Trim(PropertyText)
+    
+    MsgBox "Done."
+
+End Sub
+
+Private Sub GetRooms()
+    
+    Dim PropertyLink As String
+    
+    iLinkRow = 2
+    PropertyLink = Sheets("RAW_Properties").Cells(iLinkRow, 5).Value
+    
+    Dim iRow As Integer
+    iRow = 2
+    
+    SheetName = "RAW_Rooms"
+    Sheets(SheetName).Rows(iRow & ":" & Rows.Count).ClearContents
+    
+    Do While PropertyLink <> ""
+        HTML = GetHTML("https://www.kasa.com/properties/" & PropertyLink & "?open=amenities")
+        
+		Dim RemDataV_ID As String
+		Dim RemDataV_ID_Start As Double
+		Dim RemDataV_ID_End As Double
+		    
+		RemDataV_ID_Start = InStr(HTML, "ff:secondary fs:24-rem fw:bold mb:24-rem" & Chr(34) & " data-v-") + Len("ff:secondary fs:24-rem fw:bold mb:24-rem" & Chr(34) & " data-v-")
+		RemDataV_ID_End = InStr(RemDataV_ID_Start, HTML, ">")
+		RemDataV_ID = Mid(HTML, RemDataV_ID_Start, RemDataV_ID_End - RemDataV_ID_Start)
+		
+        Dim PositionStart As Double
+        Dim PositionEnd As Double
+        PositionStart = 1
+        PositionEnd = 1
+        
+        Dim RoomTextStart  As String
+        Dim RoomTextEnd  As String
+        Dim RoomText  As String
+        Dim NextRoomTextStart  As String
+        
+        RoomTextStart = "<h3 class=" & Chr(34) & "ff:secondary fs:20-rem fw:bold mb:8-rem" & Chr(34) & " data-v-" & RemDataV_ID & ">"
+        RoomTextEnd = "<!----><!----><!----><"
+        
+        Dim RoomName As String
+        Dim Sleeps As Integer
+        Dim Beds As Integer
+        Dim Baths As Integer
+                
+        Do While InStr(PositionEnd, HTML, RoomTextStart) > 0 And InStr(PositionStart, HTML, RoomTextEnd) > 0
+            PositionStart = InStr(PositionEnd, HTML, RoomTextStart) + Len(RoomTextStart)
+            PositionEnd = InStr(PositionStart, HTML, RoomTextEnd)
+            
+            RoomText = Mid(HTML, PositionStart, PositionEnd - PositionStart)
+            RoomName = Trim(Mid(RoomText, 1, InStr(RoomText, "</h3>") - 1))
+            Sleeps = Mid(RoomText, InStr(RoomText, " <span") - 1, 1)
+            Baths = Mid(RoomText, InStr(RoomText, "</span> ") + 8, 1)
+            Beds = Mid(RoomText, InStr(RoomText, " bed") - 1, 1)
+            
+            NextRoomStart = InStr(PositionEnd, HTML, RoomTextStart) + Len(RoomTextStart)
+            
+            Sheets(SheetName).Cells(iRow, 1).Value = Trim(PropertyLink)
+            Sheets(SheetName).Cells(iRow, 2).Value = Trim(RoomName)
+            Sheets(SheetName).Cells(iRow, 3).Value = Sleeps
+            Sheets(SheetName).Cells(iRow, 4).Value = Baths
+            Sheets(SheetName).Cells(iRow, 5).Value = Beds
+            
+            iRow = iRow + 1
+        Loop
+        
+		iLinkRow = iLinkRow + 1
+		PropertyLink = Sheets("Properties").Cells(iLinkRow, 5).Value
+    Loop
+    MsgBox "Done."
+
+End Sub
+
+Private Sub GetAmenities()
+    
+    Dim PropertyLink As String
+    
+    iLinkRow = 2
+    PropertyLink = Sheets("RAW_Properties").Cells(iLinkRow, 5).Value
+    
+    Dim iRow As Integer
+    iRow = 2
+    
+    SheetName = "Amenities"
+    Sheets(SheetName).Rows(iRow & ":" & Rows.Count).ClearContents
+    
+    Do While PropertyLink <> ""
+    
+        HTML = GetHTML("https://www.kasa.com/properties/" & PropertyLink & "?open=amenities")
+        
+        Dim PositionStart As Double
+        Dim PositionEnd As Double
+        PositionStart = 1
+        PositionEnd = 1
+        
+        Dim AmenityTextStart As String
+        Dim AmenityTexttEnd As String
+        Dim AmenityText As String
+        Dim NextAmenityTextStart As String
+    
+		AmenityTextStart = "</svg> <!----></span><span class=" & Chr(34) & "ml:16-rem" & Chr(34) & ">"
+        AmenityTextEnd = "</span></li>"
+                
+        Do While InStr(PositionEnd, HTML, AmenityTextStart) > 0 And InStr(PositionStart, HTML, AmenityTextEnd) > 0
+        
+            PositionStart = InStr(PositionEnd, HTML, AmenityTextStart) + Len(AmenityTextStart)
+            PositionEnd = InStr(PositionStart, HTML, AmenityTextEnd)
+            
+            AmenityText = Mid(HTML, PositionStart, PositionEnd - PositionStart)		
+            NextAmenityStart = InStr(PositionEnd, HTML, AmenityTextStart) + Len(AmenityTextStart)
+            
+            Sheets(SheetName).Cells(iRow, 1).Value = PropertyLink
+            Sheets(SheetName).Cells(iRow, 2).Value = AmenityText
+            
+            iRow = iRow + 1
+        Loop
+        
+		iLinkRow = iLinkRow + 1
+		PropertyLink = Sheets("Properties").Cells(iLinkRow, 5).Value
+    Loop
+    MsgBox "Done."
+
+End Sub
+
+Option Explicit
+Private MyBrowser As Selenium.ChromeDriver
+
+Sub GetFullAvailability()
+
+    Dim iRow As Integer
+    iRow = 2 ' row number of Properties
+    Dim PropertyLink As String, StartDate As Date, EndDate As Date
+    Dim FromDate As Date, ToDate As Date
+    Dim ParseThis As String
+    Dim RoomAvailabilityText As String
+    Dim RoomName As String
+    Dim i As Integer
+    i = 2 'output row on RAW_Availability
+    
+    Dim FirstRow As Integer
+    Dim LastRow As Integer
+    Dim Counter As Long
+    Dim RoomArray() As String
+    Dim ArrayLength As Integer
+    Dim MinDays As Integer
+    MinDays = 2
+    
+    Dim FindBy As New Selenium.By
+    Dim PropertySections As Selenium.WebElements
+    Dim PropertySection As Selenium.WebElement
+    Dim iCounter As Integer
+    
+    StartDate = DateSerial(2022, 1, 1)
+    EndDate = DateSerial(2022, 2, 1) 
+    
+    Do While Sheets("Properties").Range("E" & iRow).Value <> ""
+        If Sheets("Properties").Range("F" & iRow).Value > 0 Then
+            PropertyLink = Sheets("Properties").Range("E" & iRow).Value
+            Application.StatusBar = "Property Order: " & Sheets("Properties").Range("G" & iRow).Value
+            FromDate = StartDate 'FromDate and ToDate are used as variables in the link
+            ToDate = FromDate + MinDays
+            
+            FirstRow = Sheets("Rooms").Cells.Find(What:=PropertyLink, LookIn:= _
+                xlFormulas2, LookAt:=xlWhole, SearchOrder:=xlByRows, SearchDirection:= _
+                xlNext, MatchCase:=False, SearchFormat:=False).Row
+            
+            LastRow = Sheets("Rooms").Cells.Find(What:=PropertyLink, LookIn:= _
+                xlFormulas2, LookAt:=xlWhole, SearchOrder:=xlByRows, SearchDirection:= _
+                xlPrevious, MatchCase:=False, SearchFormat:=False).Row
+            
+            ArrayLength = LastRow - FirstRow + 1
+            
+            ReDim RoomArray(1 To ArrayLength)
+            
+            For Counter = 1 To ArrayLength
+                RoomArray(Counter) = Sheets("Rooms").Range("B" & FirstRow).Offset(Counter - 1, 0).Value
+                Debug.Print PropertyLink & " | " & RoomArray(Counter)
+            Next Counter
+            
+            iCounter = 1
+            
+            If MyBrowser Is Nothing Then
+                Set MyBrowser = New Selenium.ChromeDriver
+            End If
+
+            Do While FromDate <= EndDate
+                MinDays = 2
+                ToDate = FromDate + MinDays
+                Debug.Print "Get " & PropertyLink & " from " & FromDate & " to " & ToDate
+                MyBrowser.Get "https://www.kasa.com/properties/" & PropertyLink & "?checkInDate=" & Format(FromDate, "YYYY-MM-DD") & "&checkOutDate=" & Format(ToDate, "YYYY-MM-DD") & "&adultGuestCount=1&childGuestCount=0&infantGuestCount=0&travelingForBusiness=false"
+                
+                If MyBrowser.FindElementsByClass("room-type-overview").Count <> 0 Then
+                    Set PropertySection = MyBrowser.FindElementByClass("room-type-overview")
+                    ParseThis = PropertySection.Text
+                End If
+                
+                Do While MyBrowser.FindElementsByClass("room-type-overview").Count = 0 Or InStr(ParseThis, "We are experiencing an issue loading availability") <> 0 
+                    Debug.Print "REFRESH " & PropertyLink & " from " & FromDate & " to " & ToDate
+                    MyBrowser.Get "https://www.kasa.com/properties/" & PropertyLink & "?checkInDate=" & Format(FromDate, "YYYY-MM-DD") & "&checkOutDate=" & Format(ToDate, "YYYY-MM-DD") & "&adultGuestCount=1&childGuestCount=0&infantGuestCount=0&travelingForBusiness=false"
+                    Application.Wait (Now + TimeValue("0:00:03"))
+                    If MyBrowser.FindElementsByClass("room-type-overview").Count <> 0 Then
+                        Set PropertySection = MyBrowser.FindElementByClass("room-type-overview")
+                        ParseThis = PropertySection.Text
+                    End If
+                Loop
+                
+                Do While InStr(ParseThis, "Loader") <> 0
+                    Debug.Print "Wait for Loader " & PropertyLink & " from " & FromDate & " to " & ToDate
+                    Application.Wait (Now + TimeValue("0:00:01"))
+                    ParseThis = PropertySection.Text
+                Loop
+                
+				For Counter = 1 To ArrayLength
+                    If Counter = ArrayLength Then
+                        RoomAvailabilityText = Right(ParseThis, Len(ParseThis) - InStr(ParseThis, Chr(10) & RoomArray(Counter) & Chr(10)))
+                        If InStr(RoomAvailabilityText, "Book now") > 0 Then
+                            Sheets("RAW_Availability").Range("A" & i).Value = PropertyLink
+                            Sheets("RAW_Availability").Range("B" & i).Value = Left(RoomAvailabilityText, InStr(RoomAvailabilityText, Chr(10)) - 1)
+                            Sheets("RAW_Availability").Range("C" & i).Value = FromDate
+                            Sheets("RAW_Availability").Range("D" & i).Value = ToDate
+                            Sheets("RAW_Availability").Range("E" & i).Value = Mid(RoomAvailabilityText, InStr(RoomAvailabilityText, Chr(10) & "$") + 1, InStr(InStr(RoomAvailabilityText, Chr(10) & "$") + 1, RoomAvailabilityText, Chr(10)) - InStr(RoomAvailabilityText, Chr(10) & "$") - 1)
+                            Sheets("RAW_Availability").Range("F" & i).Value = Now()
+                            i = i + 1
+                        End If
+                    Else
+                        RoomAvailabilityText = Mid(ParseThis, 1 + InStr(ParseThis, Chr(10) & RoomArray(Counter) & Chr(10)), InStr(ParseThis, Chr(10) &RoomArray(Counter + 1) & Chr(10)) - InStr(ParseThis, Chr(10) & RoomArray(Counter) & Chr(10)) + 1)
+                        If InStr(RoomAvailabilityText, "Book now") > 0 Then
+                            Sheets("RAW_Availability").Range("A" & i).Value = PropertyLink
+                            Sheets("RAW_Availability").Range("B" & i).Value = Left(RoomAvailabilityText, InStr(RoomAvailabilityText, Chr(10)) - 1)
+                            Sheets("RAW_Availability").Range("C" & i).Value = FromDate
+                            Sheets("RAW_Availability").Range("D" & i).Value = ToDate
+                            Sheets("RAW_Availability").Range("E" & i).Value = Mid(RoomAvailabilityText, InStr(RoomAvailabilityText, Chr(10) & "$") + 1, InStr(InStr(RoomAvailabilityText, Chr(10) & "$") + 1, RoomAvailabilityText, Chr(10)) - InStr(RoomAvailabilityText, Chr(10) & "$") - 1)
+                            Sheets("RAW_Availability").Range("F" & i).Value = Now()
+                            i = i + 1
+                        End If
+                    End If
+                Next Counter
+                
+                If i >= 80 Then
+                    ActiveWindow.ScrollRow = i - 25
+                End If
+                    
+                Do While InStr(ParseThis, "You must book at least ") > 0
+                    If InStr(ParseThis, "You must book at least 3 nights") > 0 Then
+                        MinDays = 3
+                    ElseIf InStr(ParseThis, "You must book at least 4 nights") > 0 Then
+                        MinDays = 4
+                    ElseIf InStr(ParseThis, "You must book at least 5 nights") > 0 Then
+                        MinDays = 5
+                    ElseIf InStr(ParseThis, "You must book at least 6 nights") > 0 Then
+                        MinDays = 6
+                    ElseIf InStr(ParseThis, "You must book at least 7 nights") > 0 Then
+                        MinDays = 7
+                    ElseIf InStr(ParseThis, "You must book at least 8 nights") > 0 Then
+                        MinDays = 8
+                    ElseIf InStr(ParseThis, "You must book at least 9 nights") > 0 Then
+                        MinDays = 9
+                    ElseIf InStr(ParseThis, "You must book at least 10 nights") > 0 Then
+                        MinDays = 10
+                    ElseIf InStr(ParseThis, "You must book at least 11 nights") > 0 Then
+                        MinDays = 11
+                    ElseIf InStr(ParseThis, "You must book at least 12 nights") > 0 Then
+                        MinDays = 12
+                    ElseIf InStr(ParseThis, "You must book at least 13 nights") > 0 Then
+                        MinDays = 13
+                    ElseIf InStr(ParseThis, "You must book at least 14 nights") > 0 Then
+                        MinDays = 14
+                    ElseIf InStr(ParseThis, "You must book at least 15 nights") > 0 Then
+                        MinDays = 15
+                    ElseIf InStr(ParseThis, "You must book at least 16 nights") > 0 Then
+                        MinDays = 16
+                    ElseIf InStr(ParseThis, "You must book at least 17 nights") > 0 Then
+                        MinDays = 17
+                    ElseIf InStr(ParseThis, "You must book at least 18 nights") > 0 Then
+                        MinDays = 18
+                    ElseIf InStr(ParseThis, "You must book at least 19 nights") > 0 Then
+                        MinDays = 19
+                    ElseIf InStr(ParseThis, "You must book at least 20 nights") > 0 Then
+                        MinDays = 20
+                    ElseIf InStr(ParseThis, "You must book at least 21 nights") > 0 Then
+                        MinDays = 21
+                    ElseIf InStr(ParseThis, "You must book at least 22 nights") > 0 Then
+                        MinDays = 22
+                    ElseIf InStr(ParseThis, "You must book at least 23 nights") > 0 Then
+                        MinDays = 23
+                    ElseIf InStr(ParseThis, "You must book at least 24 nights") > 0 Then
+                        MinDays = 24
+                    ElseIf InStr(ParseThis, "You must book at least 25 nights") > 0 Then
+                        MinDays = 25
+                    ElseIf InStr(ParseThis, "You must book at least 26 nights") > 0 Then
+                        MinDays = 26
+                    ElseIf InStr(ParseThis, "You must book at least 27 nights") > 0 Then
+                        MinDays = 27
+                    ElseIf InStr(ParseThis, "You must book at least 28 nights") > 0 Then
+                        MinDays = 28
+                    ElseIf InStr(ParseThis, "You must book at least 29 nights") > 0 Then
+                        MinDays = 29
+                    ElseIf InStr(ParseThis, "You must book at least 30 nights") > 0 Then
+                        MinDays = 30
+                    Else
+                        MsgBox "Need new constraint"
+                    End If
+                   
+                    ToDate = FromDate + MinDays
+                    Debug.Print "Get " & PropertyLink & " from " & FromDate & " to " & ToDate & " | min " & MinDays
+
+                    MyBrowser.Get "https://www.kasa.com/properties/" & PropertyLink & "?checkInDate=" & Format(FromDate, "YYYY-MM-DD") & "&checkOutDate=" & Format(ToDate, "YYYY-MM-DD") & "&adultGuestCount=1&childGuestCount=0&infantGuestCount=0&travelingForBusiness=false"
+                   
+                    If MyBrowser.FindElementsByClass("room-type-overview").Count <> 0 Then
+                        Set PropertySection = MyBrowser.FindElementByClass("room-type-overview")
+                        ParseThis = PropertySection.Text
+                    End If
+            
+                    Do While MyBrowser.FindElementsByClass("room-type-overview").Count = 0 Or InStr(ParseThis, "We are experiencing an issue loading availability") <> 0
+                        Debug.Print "REFRESH " & PropertyLink & " from " & FromDate & " to " & ToDate
+                        MyBrowser.Get "https://www.kasa.com/properties/" & PropertyLink & "?checkInDate=" & Format(FromDate, "YYYY-MM-DD") & "&checkOutDate=" & Format(ToDate, "YYYY-MM-DD") & "&adultGuestCount=1&childGuestCount=0&infantGuestCount=0&travelingForBusiness=false"
+                        Application.Wait (Now + TimeValue("0:00:03"))
+                        If MyBrowser.FindElementsByClass("room-type-overview").Count <> 0 Then
+                            Set PropertySection = MyBrowser.FindElementByClass("room-type-overview")
+                            ParseThis = PropertySection.Text
+                        End If
+                    Loop
+                    
+                    Do While InStr(ParseThis, "Loader") <> 0
+                        Debug.Print "Wait for Loader " & PropertyLink & " from " & FromDate & " to " & ToDate
+                        Application.Wait (Now + TimeValue("0:00:01"))
+                        ParseThis = PropertySection.Text
+                    Loop
+                    
+					For Counter = 1 To ArrayLength
+                        If Counter = ArrayLength Then
+                            RoomAvailabilityText = Right(ParseThis, Len(ParseThis) - InStr(ParseThis, Chr(10) & RoomArray(Counter) & Chr(10)))
+                            If InStr(RoomAvailabilityText, "Book now") > 0 Then
+                                Sheets("RAW_Availability").Range("A" & i).Value = PropertyLink
+                                Sheets("RAW_Availability").Range("B" & i).Value = Left(RoomAvailabilityText, InStr(RoomAvailabilityText, Chr(10)) - 1)
+                                Sheets("RAW_Availability").Range("C" & i).Value = FromDate
+                                Sheets("RAW_Availability").Range("D" & i).Value = ToDate
+                                Sheets("RAW_Availability").Range("E" & i).Value = Mid(RoomAvailabilityText, InStr(RoomAvailabilityText, Chr(10) & "$") + 1, InStr(InStr(RoomAvailabilityText, Chr(10) & "$") + 1, RoomAvailabilityText, Chr(10)) - InStr(RoomAvailabilityText, Chr(10) & "$") - 1)
+                                Sheets("RAW_Availability").Range("F" & i).Value = Now()
+                                i = i + 1
+                            End If
+                        Else
+                            RoomAvailabilityText = Mid(ParseThis, 1 + InStr(ParseThis, Chr(10) & RoomArray(Counter) & Chr(10)), InStr(ParseThis, Chr(10) & RoomArray(Counter + 1) & Chr(10)) - InStr(ParseThis, Chr(10) & RoomArray(Counter) & Chr(10)) + 1)
+                            If InStr(RoomAvailabilityText, "Book now") > 0 Then
+                                Sheets("RAW_Availability").Range("A" & i).Value = PropertyLink
+                                Sheets("RAW_Availability").Range("B" & i).Value = Left(RoomAvailabilityText, InStr(RoomAvailabilityText, Chr(10)) - 1)
+                                Sheets("RAW_Availability").Range("C" & i).Value = FromDate
+                                Sheets("RAW_Availability").Range("D" & i).Value = ToDate
+                                Sheets("RAW_Availability").Range("E" & i).Value = Mid(RoomAvailabilityText, InStr(RoomAvailabilityText, Chr(10) & "$") + 1, InStr(InStr(RoomAvailabilityText, Chr(10) & "$") + 1, RoomAvailabilityText, Chr(10)) - InStr(RoomAvailabilityText, Chr(10) & "$") - 1)
+                                Sheets("RAW_Availability").Range("F" & i).Value = Now()
+                                i = i + 1
+                            End If
+                        End If
+                    Next Counter
+                Loop
+                FromDate = FromDate + 1
+            Loop
+        End If
+        If Sheets("Properties").Range("F" & iRow).Value > 0 Then
+            ThisWorkbook.Save
+        End If
+        iRow = iRow + 1
+    Loop
+    MyBrowser.Quit
+End Sub
+
+Function GetHTML(PropertyLink As String, FromDate As Date, ToDate As Date) As String
+
+    Dim FindBy As New Selenium.By
+    Dim PropertySections As Selenium.WebElements
+    Dim PropertySection As Selenium.WebElement
+    Dim iRow As Integer
+    Dim iCounter As Integer
+    Dim ParseThis As String
+    iRow = 2
+    iCounter = 1
+        
+	MyBrowser.Get "https://www.kasa.com/properties/" & PropertyLink & "?checkInDate=" & Format(FromDate, "YYYY-MM-DD") & "&checkOutDate=" & Format(ToDate, "YYYY-MM-DD") & "&adultGuestCount=1&childGuestCount=0&infantGuestCount=0&travelingForBusiness=false"
+	Set PropertySection = MyBrowser.FindElementByClass("room-type-overview")
+	ParseThis = PropertySection.Text
+	
+	Do While (InStr(ParseThis, "Check availability") <> 0 Or InStr(ParseThis, "Loader") <> 0) And iCounter <= 1000
+		Set PropertySection = MyBrowser.FindElementByClass("room-type-overview")
+		ParseThis = PropertySection.Text
+		iCounter = iCounter + 1
+	Loop
+
+	Debug.Print iCounter
+	Sheets("Sheet8").Cells(iRow, 1).Value = ParseThis
+	GetHTML = ParseThis
+
+End Function
+
+    
+Function GetRoomArray(PropertyLink As String) As Variant
+
+    Dim FirstRow As Integer
+    Dim LastRow As Integer
+    Dim Counter As Long
+    
+    FirstRow = Sheets("Rooms").Cells.Find(What:=PropertyLink, LookIn:= _
+        xlFormulas2, LookAt:=xlWhole, SearchOrder:=xlByRows, SearchDirection:= _
+        xlNext, MatchCase:=False, SearchFormat:=False).Row
+    
+    LastRow = Sheets("Rooms").Cells.Find(What:=PropertyLink, LookIn:= _
+        xlFormulas2, LookAt:=xlWhole, SearchOrder:=xlByRows, SearchDirection:= _
+        xlPrevious, MatchCase:=False, SearchFormat:=False).Row
+
+    Dim RoomArray() As String
+    Dim ArrayLength As Integer
+    
+    ArrayLength = LastRow - FirstRow + 1
+    
+    ReDim RoomArray(1 To ArrayLength)
+    
+    For Counter = 1 To ArrayLength
+        RoomArray(Counter) = Sheets("Rooms").Range("B" & FirstRow).Offset(Counter - 1, 0).Value
+        Debug.Print PropertyLink & " | " & RoomArray(Counter)
+    Next Counter
+    
+    GetRoomArray = RoomArray()
+    
+End Function
+
+Sub Findtrips()
+
+    Dim PropertyLink As String
+    Dim RoomName As String
+    Dim PricePerNight As Currency
+    Dim IsAvailable As Integer
+    
+    Dim iDate As Date
+    Dim iRow As Integer
+    iRow = 2 
+    Dim i As Long
+    i = 2 
+	
+    Dim RoomHasAvailability As Integer
+    
+    Dim SheetName As String
+    SheetName = "RAW_Trips"
+    
+    
+    Do While Sheets("Rooms").Range("A" & iRow).Value <> ""
+
+        PropertyLink = Sheets("Rooms").Range("A" & iRow).Value
+        RoomName = Sheets("Rooms").Range("B" & iRow).Value
+        RoomHasAvailability = Sheets("Rooms").Range("F" & iRow).Value
+        
+        If RoomHasAvailability = 1 Then
+            Sheets("Availability").Range("Filter_PropertyLink").Value = PropertyLink
+            Sheets("Availability").Range("Filter_RoomName").Value = RoomName
+            iDate = Sheets("Availability").Range("Filter_MinDate").Value
+            Sheets("Availability").Range("Filter_iDate").Value = iDate
+            IsAvailable = Sheets("Availability").Range("Filter_IsAvailable").Value
+            
+            Dim FirstDate As Date
+            Dim LastDate As Date
+            
+            FirstDate = iDate
+            Application.StatusBar = PropertyLink & " (" & iRow & ") | " & RoomName & " | "
+            Do While iDate <= Sheets("Availability").Range("Filter_MaxDate").Value
+            
+                Do While IsAvailable = 1
+                    iDate = iDate + 1
+                    Sheets("Availability").Range("Filter_iDate").Value = iDate
+                    IsAvailable = Sheets("Availability").Range("Filter_IsAvailable").Value
+                    If IsAvailable = 0 Then LastDate = iDate
+                Loop
+                Dim NewI As Integer
+                NewI = 2
+                Do While FirstDate + NewI <= LastDate
+                    Application.StatusBar = PropertyLink & " (" & iRow & ") | " & RoomName & " | " & FirstDate
+                    Do While FirstDate + NewI <= LastDate
+                        Sheets("RAW_Trips").Range("A" & i).Value = PropertyLink
+                        Sheets("RAW_Trips").Range("B" & i).Value = RoomName
+                        Sheets("RAW_Trips").Range("C" & i).Value = FirstDate
+                        Sheets("RAW_Trips").Range("D" & i).Value = FirstDate + NewI
+                         NewI = NewI + 1
+                        i = i + 1
+                    Loop
+                    FirstDate = FirstDate + 1
+                    NewI = 2
+                    If i > 70 Then
+                        ActiveWindow.ScrollRow = i - 70
+                    End If
+                Loop
+                
+                Do While IsAvailable = 0 And iDate <= Sheets("Availability").Range("Filter_MaxDate").Value
+                    iDate = iDate + 1
+                    Sheets("Availability").Range("Filter_iDate").Value = iDate
+                    IsAvailable = Sheets("Availability").Range("Filter_IsAvailable").Value
+                Loop
+                FirstDate = iDate
+            Loop
+        End If
+		Application.StatusBar = False
+		iRow = iRow + 1
+    Loop
+    ThisWorkbook.Save
+    MsgBox "Done."
+End Sub
